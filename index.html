@@ -1,0 +1,833 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>ИИ для бухгалтера · вебинар</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&family=Cormorant+Garamond:ital,wght@1,500;1,600&display=swap">
+<style>
+/* Layout: sticky step-rail on top, one "screen" per step routed by #hash, presenter arrows ← → */
+:root{
+  --milk:#F4EEE9; --paper:#FBF8F4; --ink:#2E2A28; --ink-2:#5E544E; --ink-3:#8A7F78;
+  --blue:#7FAEC6; --blue-deep:#3E6F88; --blue-soft:#E3EEF3;
+  --terra:#C56245; --terra-deep:#A64D34; --terra-soft:#F3E1D9;
+  --line:#E2D8D0;
+  --f-text:'Manrope', Arial, sans-serif;
+  --f-big:'Playfair Display', Georgia, serif;
+  --f-it:'Cormorant Garamond', Georgia, serif;
+  color-scheme: light;
+}
+*{box-sizing:border-box}
+body{background:var(--milk);color:var(--ink);font-family:var(--f-text);font-size:17px;line-height:1.6;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:0 64px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top, 0px);z-index:10;background:var(--milk)}
+a{color:var(--terra-deep)}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--blue-deep);outline-offset:3px}
+.wrap{max-width:1180px;margin-inline:auto}
+.it{font-family:var(--f-it);font-style:italic;font-weight:500;color:var(--terra)}
+.eyebrow{font-size:12px;letter-spacing:.22em;text-transform:uppercase;font-weight:700;color:var(--terra-deep)}
+.muted{color:var(--ink-2)}
+h1,h2,h3{text-wrap:balance;margin:0}
+h1{font-family:var(--f-big);font-weight:600;font-size:clamp(40px,6.4vw,84px);line-height:1.02;letter-spacing:-.01em}
+h2{font-family:var(--f-big);font-weight:600;font-size:clamp(30px,4.2vw,54px);line-height:1.08}
+h3{font-size:19px;font-weight:700;line-height:1.3}
+p{margin:0}
+
+/* top bar */
+.bar{position:sticky;top:env(safe-area-inset-top, 0px);z-index:5;background:color-mix(in srgb,var(--milk) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);margin-inline:calc(-1 * max(16px, env(safe-area-inset-left, 0px)))}
+.bar-in{max-width:1180px;margin-inline:auto;display:flex;align-items:center;gap:18px;padding:10px max(16px, env(safe-area-inset-left, 0px))}
+.plate{display:flex;align-items:center;gap:10px;font-size:11px;letter-spacing:.2em;font-weight:700;white-space:nowrap}
+.plate img{height:30px;width:auto}
+.rail{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0}
+.rail::-webkit-scrollbar{display:none}
+.rail a{flex:none;text-decoration:none;color:var(--ink-2);font-size:14px;font-weight:600;padding:8px 14px;border-radius:999px;border:1px solid transparent;display:flex;gap:8px;align-items:center}
+.rail a .n{font-family:var(--f-big);color:var(--blue-deep);font-size:15px}
+.rail a:hover{border-color:var(--line);color:var(--ink)}
+.rail a[aria-current="page"]{background:var(--ink);color:var(--paper)}
+.rail a[aria-current="page"] .n{color:var(--blue)}
+
+/* views */
+.view{padding-top:48px;display:flex;flex-direction:column;gap:40px;animation:rise .45s ease both}
+@keyframes rise{from{opacity:.001;transform:translateY(10px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.view{animation:none}*{transition:none!important}}
+.head{display:flex;flex-direction:column;gap:14px;max-width:860px}
+.lead{font-size:20px;line-height:1.55;color:var(--ink-2);max-width:720px}
+.grid2{display:grid;grid-template-columns:1.15fr .85fr;gap:28px;align-items:start}
+.grid2>*{min-width:0}
+@media (max-width:860px){.grid2{grid-template-columns:1fr}}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:28px}
+.dark{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.dark .muted{color:#CFC4BC}
+.say{border-left:3px solid var(--blue);padding:4px 0 4px 18px;color:var(--ink-2);font-size:15px}
+.say b{color:var(--ink)}
+.next{align-self:flex-start;display:inline-flex;gap:10px;align-items:center;background:var(--ink);color:var(--paper);border:0;border-radius:999px;padding:14px 24px;font-weight:700;text-decoration:none}
+.next:hover{background:var(--terra-deep)}
+.btn{background:var(--paper);border:1px solid var(--ink);color:var(--ink);border-radius:999px;padding:10px 18px;font-weight:600;font-size:15px}
+.btn:hover{background:var(--ink);color:var(--paper)}
+.btn.blue{background:var(--blue);border-color:var(--blue);color:var(--ink)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:8px 14px;font-size:14px;font-weight:600;color:var(--ink)}
+.chip:hover,.chip[aria-pressed="true"]{border-color:var(--terra);color:var(--terra-deep);background:var(--terra-soft)}
+.icon{width:28px;height:28px;stroke:currentColor;fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+/* home */
+.hero{display:grid;grid-template-columns:1fr 360px;gap:40px;align-items:center}
+.hero>*{min-width:0}
+.hero img{width:100%;height:auto;max-width:360px}
+@media (max-width:860px){.hero{grid-template-columns:1fr}.hero img{max-width:240px}}
+.reality{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:1px solid var(--line)}
+.reality>div{padding:22px 22px 22px 0;display:flex;flex-direction:column;gap:6px;border-bottom:1px solid var(--line)}
+@media (max-width:860px){.reality{grid-template-columns:1fr 1fr}}
+@media (max-width:480px){.reality{grid-template-columns:1fr}}
+.reality h3{font-family:var(--f-big);font-weight:600;font-size:22px}
+.stairs{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;align-items:end}
+.stairs a{text-decoration:none;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:8px;justify-content:flex-end;transition:transform .2s, border-color .2s}
+.stairs a:hover{transform:translateY(-4px);border-color:var(--blue)}
+.stairs a .num{font-family:var(--f-big);font-size:44px;line-height:1;color:var(--blue-deep)}
+.stairs a.top{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.stairs a.top .num{color:var(--blue)}
+.stairs a .muted{font-size:14px}
+.stairs a.top .muted{color:#CFC4BC}
+@media (min-width:861px){.stairs a:nth-child(1){min-height:170px}.stairs a:nth-child(2){min-height:210px}.stairs a:nth-child(3){min-height:250px}.stairs a:nth-child(4){min-height:290px}.stairs a:nth-child(5){min-height:330px}}
+@media (max-width:860px){.stairs{grid-template-columns:1fr 1fr}}
+
+/* prompt builder */
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+select,textarea,input[type=text],input[type=number]{font:inherit;font-size:16px;color:var(--ink);background:var(--milk);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%}
+textarea{resize:vertical;min-height:70px}
+.check{display:flex;gap:10px;align-items:flex-start;font-size:15px}
+.check input{margin-top:4px;accent-color:var(--terra)}
+.out{white-space:pre-wrap;font-size:15.5px;line-height:1.6;background:var(--milk);border-radius:12px;padding:18px;border:1px dashed var(--blue)}
+.dark .out{background:#3A3532;border-color:#5E544E;color:var(--paper)}
+.formula{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-weight:700}
+.formula span{background:var(--blue-soft);color:var(--blue-deep);padding:6px 12px;border-radius:8px}
+.formula i{font-style:normal;color:var(--ink-3)}
+
+/* calculator + KP */
+.calc{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.calc .full{grid-column:1/-1}
+@media (max-width:480px){.calc{grid-template-columns:1fr}}
+.price{font-family:var(--f-big);font-size:clamp(40px,5vw,60px);line-height:1;font-variant-numeric:tabular-nums}
+.kp{background:#fff;color:var(--ink);border-radius:6px;padding:28px;box-shadow:0 18px 40px -20px rgba(46,42,40,.45);display:flex;flex-direction:column;gap:14px;font-size:14.5px}
+.kp .kp-top{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid var(--terra);padding-bottom:12px;gap:12px}
+.kp img{height:38px;width:auto}
+.kp table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.kp td{padding:7px 0;border-bottom:1px solid var(--line)}
+.kp td:last-child{text-align:right;white-space:nowrap}
+.kp .total td{font-weight:700;border-bottom:0;font-size:16px}
+.note{font-size:13px;color:var(--ink-3)}
+video{width:100%;border-radius:14px;background:var(--ink);display:block;max-width:100%}
+.vframe{max-width:300px;width:100%;margin-inline:auto}
+
+/* chat mock */
+.chat{display:flex;flex-direction:column;gap:10px;min-height:280px}
+.msg{max-width:86%;padding:11px 15px;border-radius:16px;font-size:15px;line-height:1.5;animation:rise .35s ease both}
+.msg.me{align-self:flex-end;background:var(--blue);color:var(--ink);border-bottom-right-radius:4px}
+.msg.bot{align-self:flex-start;background:var(--paper);color:var(--ink);border:1px solid var(--line);border-bottom-left-radius:4px}
+.dark .msg.bot{background:#3A3532;color:var(--paper);border-color:#5E544E}
+.msg .src{display:block;margin-top:6px;font-size:12.5px;color:var(--terra-deep);font-weight:600}
+.dark .msg .src{color:#E8A189}
+.doc{align-self:flex-start;background:#fff;color:var(--ink);border-radius:10px;padding:16px 18px;width:min(100%,380px);border-top:3px solid var(--terra);font-size:14px;animation:rise .35s ease both}
+.doc b{font-size:15px}
+.who{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.dark .who{color:#B3A79F}
+
+/* flow */
+.flow{display:flex;gap:10px;align-items:stretch;flex-wrap:wrap}
+.flow>div{flex:1 1 150px;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.flow>div b{font-size:15px}
+.flow>div span{font-size:14px;color:var(--ink-2)}
+.flow .arrow{flex:0 0 auto;background:none;border:0;padding:0;align-self:center;color:var(--terra);font-size:22px}
+
+/* tabs */
+.tabs{display:flex;gap:6px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:12px}
+.tabs button{border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:10px 18px;font-weight:700;font-size:15px;color:var(--ink-2);display:flex;gap:8px;align-items:center}
+.tabs button .icon{width:20px;height:20px}
+.tabs button[aria-selected="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.swatches{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+@media (max-width:640px){.swatches{grid-template-columns:1fr 1fr}}
+.sw{border-radius:14px;overflow:hidden;border:1px solid var(--line);background:var(--paper)}
+.sw div{height:90px}
+.sw p{padding:10px 12px;font-size:13px}
+.sw p b{display:block;font-size:14px}
+.typeset{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media (max-width:640px){.typeset{grid-template-columns:1fr}}
+.typeset>div{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:18px;min-width:0}
+.steps{counter-reset:s;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.steps>div{counter-increment:s;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:6px}
+.steps>div::before{content:counter(s);font-family:var(--f-big);font-size:28px;color:var(--blue-deep);line-height:1}
+.steps>div b{font-size:15px}
+.steps>div span{font-size:13.5px;color:var(--ink-2)}
+.week{display:grid;grid-template-columns:repeat(7,minmax(110px,1fr));gap:8px}
+.weekwrap{overflow-x:auto}
+.day{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px;min-height:150px}
+.day .d{font-size:12px;font-weight:700;letter-spacing:.1em;color:var(--ink-3)}
+.post{font-size:13px;font-weight:600;padding:6px 8px;border-radius:8px;line-height:1.3}
+.post.reels{background:var(--blue-soft);color:var(--blue-deep)}
+.post.car{background:var(--terra-soft);color:var(--terra-deep)}
+.post.text{background:#ECE6E0;color:var(--ink)}
+.post.story{border:1px dashed var(--ink-3);color:var(--ink-2)}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media (max-width:760px){.metrics{grid-template-columns:1fr}}
+.metric{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:8px}
+.metric .bar-m{height:6px;border-radius:6px;background:var(--line);overflow:hidden}
+.metric .bar-m i{display:block;height:100%;background:var(--blue)}
+.metric input{max-width:140px}
+
+/* course */
+.mods{display:flex;flex-direction:column;gap:10px}
+details.mod{background:var(--paper);border:1px solid var(--line);border-radius:14px}
+details.mod summary{list-style:none;cursor:pointer;padding:18px 20px;display:flex;gap:16px;align-items:center}
+details.mod summary::-webkit-details-marker{display:none}
+details.mod summary .n{font-family:var(--f-big);font-size:30px;color:var(--blue-deep);width:36px;flex:none}
+details.mod summary .t{flex:1;min-width:0}
+details.mod summary .t b{display:block;font-size:17px}
+details.mod summary .t span{font-size:14px;color:var(--ink-2)}
+details.mod summary .m{font-size:13px;color:var(--ink-3);white-space:nowrap;font-variant-numeric:tabular-nums}
+details.mod[open] summary{border-bottom:1px solid var(--line)}
+details.mod ol{margin:0;padding:14px 20px 18px 72px;display:flex;flex-direction:column;gap:6px;font-size:15px}
+details.mod ol li::marker{color:var(--terra)}
+details.mod ol li span{color:var(--ink-3);font-variant-numeric:tabular-nums}
+@media (max-width:480px){details.mod ol{padding-left:40px}details.mod summary .m{display:none}}
+.tariffs{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+@media (max-width:960px){.tariffs{grid-template-columns:1fr 1fr}}
+@media (max-width:520px){.tariffs{grid-template-columns:1fr}}
+.tariff{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:22px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.tariff.rec{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.tariff .p{font-family:var(--f-big);font-size:34px;line-height:1;font-variant-numeric:tabular-nums}
+.tariff s{color:var(--ink-3);font-size:14px}
+.tariff.rec s{color:#B3A79F}
+.tariff ul{margin:0;padding-left:18px;font-size:14px;display:flex;flex-direction:column;gap:4px}
+.tariff .tag{align-self:flex-start;font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--blue);color:var(--ink)}
+.offer{background:var(--terra-deep);color:var(--paper);border-radius:18px;padding:28px;display:flex;flex-wrap:wrap;gap:16px 40px;align-items:center;justify-content:space-between}
+.offer h3{font-family:var(--f-big);font-weight:600;font-size:28px}
+.faq{display:grid;grid-template-columns:1fr 1fr;gap:0 40px}
+.faq>div{padding:16px 0;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:4px}
+@media (max-width:760px){.faq{grid-template-columns:1fr}}
+.tg{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:640px){.tg{grid-template-columns:1fr}}
+.tg a{display:flex;gap:16px;align-items:center;text-decoration:none;color:var(--ink);background:var(--blue-soft);border:1px solid var(--blue);border-radius:16px;padding:20px 22px;min-width:0}
+.tg a:hover{background:var(--blue)}
+.tg a .icon{width:36px;height:36px;color:var(--blue-deep)}
+.tg a>span{display:flex;flex-direction:column;gap:2px;min-width:0}
+.tg a b{font-size:18px}
+.tg a .muted{font-size:15px;overflow-wrap:anywhere}
+.tg-mini{display:flex;flex-wrap:wrap;gap:8px 20px;font-size:14px;font-weight:600}
+.tg-mini a{text-decoration:none;color:var(--blue-deep)}
+/* reels gallery + player */
+.reels{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
+.reel{position:relative;border:0;padding:0;background:var(--paper);border-radius:14px;overflow:hidden;aspect-ratio:9/16;max-width:100%;box-shadow:0 10px 26px -18px rgba(46,42,40,.6);text-align:left;color:var(--paper);transition:transform .2s}
+.reel:hover{transform:translateY(-3px)}
+.reel img{width:100%;height:100%;object-fit:cover;display:block}
+.reel .cap{position:absolute;inset:auto 0 0 0;padding:28px 10px 10px;font-size:12.5px;font-weight:600;line-height:1.3;background:linear-gradient(transparent,rgba(46,42,40,.88))}
+.reel .play{position:absolute;top:10px;right:10px;width:34px;height:34px;border-radius:50%;background:rgba(46,42,40,.72);display:grid;place-items:center}
+.reel .play::before{content:"";border-left:11px solid var(--paper);border-top:7px solid transparent;border-bottom:7px solid transparent;margin-left:3px}
+.reels-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.player{position:fixed;inset:0;z-index:20;background:rgba(30,27,26,.86);display:grid;place-items:center;padding:calc(20px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) calc(20px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px))}
+.player-in{display:flex;flex-direction:column;gap:10px;align-items:center;max-height:100%}
+.player video{height:min(80vh,820px);width:auto;max-width:100%;aspect-ratio:9/16;border-radius:16px}
+.player p{color:var(--paper);font-weight:600;max-width:460px;text-align:center}
+.player .x{position:absolute;top:calc(14px + env(safe-area-inset-top, 0px));right:max(16px, env(safe-area-inset-right, 0px));background:var(--paper);border:0;border-radius:999px;padding:8px 16px;font-weight:700}
+.player .nav{display:flex;gap:10px}
+.hero-reel{max-width:300px;width:100%;justify-self:center}
+.hint{position:fixed;right:max(16px, env(safe-area-inset-right, 0px));bottom:calc(14px + env(safe-area-inset-bottom, 0px));font-size:12px;color:var(--ink-3);background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:6px 12px}
+@media (max-width:760px){.hint{display:none}}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></symbol>
+  <symbol id="i-calc" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 12h2M12 12h2M16 12h0M8 16h2M12 16h2"/></symbol>
+  <symbol id="i-brain" viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h7"/><circle cx="18" cy="16" r="3"/><path d="M20.2 18.2 22 20"/></symbol>
+  <symbol id="i-film" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m10 9 5 3-5 3z"/></symbol>
+  <symbol id="i-doc" viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/></symbol>
+  <symbol id="i-palette" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="8" cy="10" r="1.2"/><circle cx="12" cy="7.5" r="1.2"/><circle cx="16" cy="10" r="1.2"/><path d="M12 21c-1.5 0-2-1.5-1-2.5s0-2.5-1.5-2.5"/></symbol>
+  <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V4M4 20h16"/><path d="m7 15 4-4 3 3 5-6"/></symbol>
+</svg>
+
+<header class="bar">
+  <div class="bar-in">
+    <div class="plate"><img src="media/logo.png" alt="ТАТЕВ"><span>AI МАСТЕРСКАЯ ТАТЕВ</span></div>
+    <nav class="rail" id="rail" aria-label="Разделы вебинара"></nav>
+  </div>
+</header>
+
+<main class="wrap" id="app"></main>
+<p class="hint">← → листать разделы</p>
+
+<script>
+(function(){
+const LOGO = 'media/logo.png';
+const ROUTES = [
+  {id:'home',    label:'Начало',     n:''},
+  {id:'chat',    label:'Запрос',     n:'1'},
+  {id:'service', label:'Сервис',     n:'2'},
+  {id:'agent',   label:'Агент',      n:'3'},
+  {id:'content', label:'Контент',    n:'4'},
+  {id:'onec',    label:'Агент 1С',   n:'5'},
+  {id:'course',  label:'Курс',       n:''}
+];
+const ic = (id, cls='icon') => `<svg class="${cls}" aria-hidden="true"><use href="#i-${id}"/></svg>`;
+const rub = n => new Intl.NumberFormat('ru-RU').format(Math.round(n)) + ' ₽';
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const REELS = {
+  'intro-001':['Знакомство: бухгалтер, который применяет ИИ'],
+  'p01-zapros':['ИИ отвечает общими словами — дело в запросе: 4 детали'],
+  'p02-pismo':['Письмо клиенту без канцелярита: одна фраза в промпте'],
+  'x02-proverka':['3 вопроса, которые проверят любой ответ нейросети'],
+  's01-calc':['Калькулятор бухуслуг с КП одним промптом'],
+  's02-taxcalc':['Калькулятор налоговой нагрузки и цены продажи'],
+  's05-repair':['Приложение учёта ремонта: план и факт'],
+  'p00-agent':['Обычный чат или агент: навигатор и водитель'],
+  'p03-umeet':['Что ещё умеет мой агент'],
+  'p02':['Агент присылает мне утреннюю газету'],
+  's03-tg-assistant':['Ассистент в Telegram: голосовое → план'],
+  's04-montage':['Этот ролик я не записывала: голос-клон, анимация кодом'],
+  'm01-vidy':['4 вида монтажа, которые делает нейросеть'],
+  'm02-golova':['Говорящая голова: что ИИ делает с видео с телефона'],
+  'm04-ekran':['Запись экрана: из трёх минут — пять секунд'],
+  'h01-humanizer':['Скилл Humanizer: тексты как у человека'],
+  'n01':['Что изменится для ИП с 1 января 2027 года'],
+  'n07':['НДС на УСН в 2027 году: кого коснётся'],
+  'n30':['Деньги на счёте — ещё не прибыль']
+};
+const reels = (ids, title, note) => `
+  <div style="display:flex;flex-direction:column;gap:12px">
+    ${title?`<div class="reels-head"><h3>${title}</h3>${note?`<span class="note">${note}</span>`:''}</div>`:''}
+    <div class="reels">${ids.map(id=>`<button class="reel" data-reel="${id}" data-set="${ids.join(',')}" aria-label="Смотреть: ${esc(REELS[id][0])}"><img src="media/reels/${id}.jpg" alt="" loading="lazy"><span class="play" aria-hidden="true"></span><span class="cap">${esc(REELS[id][0])}</span></button>`).join('')}</div>
+  </div>`;
+const next = id => { const i = ROUTES.findIndex(r=>r.id===id); const r = ROUTES[i+1]; return r ? `<a class="next" href="#${r.id}">Дальше: ${r.label} →</a>` : ''; };
+
+/* ---------- views ---------- */
+const V = {};
+
+V.home = () => `
+<section class="view">
+  <div class="hero">
+    <div class="head">
+      <p class="eyebrow">Вебинар · 12 ноября</p>
+      <h1>ИИ для <span class="it">бухгалтера</span></h1>
+      <p class="lead">Как ИИ уже сегодня забирает рутину: от простого запроса в чате до своих сервисов и агентов. Всё вживую, всё можно повторить.</p>
+      <p class="tg-mini"><a href="https://t.me/Tatev_ProBusiness" target="_blank" rel="noopener">Канал: t.me/Tatev_ProBusiness</a><a href="https://t.me/TatevProfbuh_bot" target="_blank" rel="noopener">Бот: @TatevProfbuh_bot</a></p>
+    </div>
+    <div class="hero-reel"><button class="reel" style="width:100%" data-reel="intro-001" data-set="intro-001" aria-label="Смотреть: ${REELS['intro-001'][0]}"><img src="media/reels/intro-001.jpg" alt=""><span class="play" aria-hidden="true"></span><span class="cap">Знакомство · голос-клон, монтаж ИИ</span></button></div>
+  </div>
+  <div class="head"><p class="eyebrow">Сегодняшние реалии</p><h2>Работы больше, а рук <span class="it">столько же</span></h2></div>
+  <div class="reality">
+    <div><h3>Законы меняются постоянно</h3><p class="muted">Новые формы, режимы, разъяснения — и всё нужно успеть прочитать.</p></div>
+    <div><h3>Клиенты ждут ответ сразу</h3><p class="muted">Письма, счета, КП и «а можно быстренько?» в мессенджерах.</p></div>
+    <div><h3>Рутина съедает день</h3><p class="muted">Выписки, сверки, первичка, одни и те же ответы по кругу.</p></div>
+    <div><h3>ИИ уже умеет это брать</h3><p class="muted">Писать, считать, разбирать документы и говорить голосом.</p></div>
+  </div>
+  <div class="head"><p class="eyebrow">Чем может помочь ИИ · 5 шагов</p><h2>От запроса в чате до помощника, <span class="it">который работает сам</span></h2></div>
+  <nav class="stairs" aria-label="Пять шагов">
+    <a href="#chat"><span class="num">1</span><h3>Запрос в чате</h3><span class="muted">письмо, КП, договор, презентация</span></a>
+    <a href="#service"><span class="num">2</span><h3>Свой сервис</h3><span class="muted">калькулятор с готовым КП</span></a>
+    <a href="#agent"><span class="num">3</span><h3>Агент со знаниями</h3><span class="muted">отвечает по вашим документам</span></a>
+    <a href="#content"><span class="num">4</span><h3>Контент-завод</h3><span class="muted">бренд, монтаж, голос, автопостинг</span></a>
+    <a href="#onec" class="top"><span class="num">5</span><h3>Агент 1С</h3><span class="muted">счёт и УПД по заявке клиента</span></a>
+  </nav>
+  ${next('home')}
+</section>`;
+
+/* --- step 1: prompt builder --- */
+const ROLES = ['налоговый консультант','помощник главного бухгалтера','кадровик','финансист','юрист по договорам','маркетолог бухгалтерской фирмы'];
+const FORMATS = ['готовый текст письма','коммерческое предложение','таблица','план по шагам','структура презентации по слайдам','договор по шаблону'];
+const EXAMPLES = [
+  {chip:'Письмо о долге', role:1, ctx:'Клиент ООО на УСН задерживает оплату за бухобслуживание второй месяц. Отношения хорошие, терять клиента не хотим.', task:'Составь вежливое, но твёрдое письмо о задолженности с конкретным сроком оплаты.', fmt:0},
+  {chip:'Коммерческое предложение', role:5, ctx:'Новый клиент: ООО на УСН «доходы минус расходы», 5 сотрудников, около 60 операций в месяц, торговля.', task:'Подготовь коммерческое предложение на бухгалтерское обслуживание: что входит, сроки, как работаем.', fmt:1},
+  {chip:'Договор и счёт', role:4, ctx:'Наш шаблон договора на бухобслуживание приложен. Клиент — ИП на патенте.', task:'Заполни договор под этого клиента и перечисли, что нужно для счёта.', fmt:5},
+  {chip:'Презентация собственнику', role:3, ctx:'Итоги квартала: выручка, расходы, налоги, остатки на счетах (данные обезличены).', task:'Сделай структуру презентации для собственника: что произошло, почему и что делать дальше.', fmt:4},
+  {chip:'Спорная ситуация', role:0, ctx:'Компания на ОСН оплатила обучение сотрудника в частной школе английского.', task:'Можно ли учесть расходы в налоге на прибыль? Дай аргументы за и против.', fmt:3}
+];
+V.chat = () => `
+<section class="view">
+  <div class="head">
+    <p class="eyebrow">Шаг 1 · Запрос в чате</p>
+    <h2>Просто попросите — <span class="it">как сотрудника</span></h2>
+    <p class="lead">Документ, письмо, КП, презентация — с этого начинают все. Разница в результате — в том, как поставлена задача.</p>
+  </div>
+  <div class="formula" aria-label="Формула запроса"><span>Роль</span><i>+</i><span>Контекст</span><i>+</i><span>Задача</span><i>+</i><span>Формат</span><i>+</i><span>Проверка</span></div>
+  <div class="grid2">
+    <div class="panel" style="display:flex;flex-direction:column;gap:16px">
+      <div><p class="who" style="margin-bottom:8px">Выберите пример</p><div class="chips" id="exChips">${EXAMPLES.map((e,i)=>`<button class="chip" data-ex="${i}" aria-pressed="${i===1}">${e.chip}</button>`).join('')}</div></div>
+      <div class="field"><label for="pRole">Роль</label><select id="pRole">${ROLES.map((r,i)=>`<option value="${i}">${r}</option>`).join('')}</select></div>
+      <div class="field"><label for="pCtx">Контекст</label><textarea id="pCtx"></textarea></div>
+      <div class="field"><label for="pTask">Задача</label><textarea id="pTask"></textarea></div>
+      <div class="field"><label for="pFmt">Формат ответа</label><select id="pFmt">${FORMATS.map((r,i)=>`<option value="${i}">${r}</option>`).join('')}</select></div>
+      <label class="check"><input type="checkbox" id="pCheck" checked> Сошлись на нормы НК РФ и отметь, что нужно проверить по первоисточнику</label>
+    </div>
+    <div class="panel dark" style="display:flex;flex-direction:column;gap:14px">
+      <p class="eyebrow" style="color:#E8A189">Готовый запрос</p>
+      <div class="out" id="pOut"></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn blue" id="pCopy">Скопировать запрос</button><span id="pCopied" class="muted" style="align-self:center;font-size:14px"></span></div>
+      <p class="muted" style="font-size:14px">Вставьте в ChatGPT, Claude или ГигаЧат и сравните с ответом на «напиши КП».</p>
+    </div>
+  </div>
+  ${reels(['p01-zapros','p02-pismo','x02-proverka'],'Мои Reels про запросы','нажмите, чтобы посмотреть')}
+  ${next('chat')}
+</section>`;
+
+/* --- step 2: calculator --- */
+const REG = {usn6:['УСН «доходы»',5000],usn15:['УСН «доходы минус расходы»',8000],osn:['ОСН с НДС',15000],ausn:['АУСН',3000],psn:['ИП на патенте',2500]};
+V.service = () => `
+<section class="view">
+  <div class="head">
+    <p class="eyebrow">Шаг 2 · Свой сервис</p>
+    <h2>Устали каждый раз писать в чат? <span class="it">Сделайте сервис</span></h2>
+    <p class="lead">Один раз описали ИИ задачу — он написал программу. Дальше вы вводите параметры, а сервис сам считает и выдаёт готовый документ. Это вайб-кодинг: код пишет ИИ, задачу ставите вы.</p>
+  </div>
+  <div class="grid2">
+    <div class="panel" style="display:flex;flex-direction:column;gap:18px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap"><h3>Калькулятор стоимости услуг</h3><span class="note">демо · расценки условные</span></div>
+      <div class="calc">
+        <div class="field full"><label for="cName">Клиент</label><input type="text" id="cName" value="ООО «ДЕМО ТОРГ»"></div>
+        <div class="field full"><label for="cReg">Система налогообложения</label><select id="cReg">${Object.entries(REG).map(([k,v])=>`<option value="${k}" ${k==='usn15'?'selected':''}>${v[0]}</option>`).join('')}</select></div>
+        <div class="field"><label for="cOps">Операций в месяц</label><input type="number" id="cOps" min="0" value="60"></div>
+        <div class="field"><label for="cEmp">Сотрудников</label><input type="number" id="cEmp" min="0" value="5"></div>
+        <label class="check full"><input type="checkbox" id="cVed"> Внешнеэкономическая деятельность</label>
+        <label class="check full"><input type="checkbox" id="cKadr" checked> Кадровый учёт</label>
+      </div>
+      <details><summary class="note" style="cursor:pointer">Настроить свои расценки</summary>
+        <div class="calc" style="margin-top:12px">
+          <div class="field"><label for="rOp">За операцию, ₽</label><input type="number" id="rOp" value="120"></div>
+          <div class="field"><label for="rEmp">За сотрудника, ₽</label><input type="number" id="rEmp" value="900"></div>
+          <div class="field"><label for="rVed">ВЭД, ₽</label><input type="number" id="rVed" value="6000"></div>
+          <div class="field"><label for="rKadr">Кадры, ₽</label><input type="number" id="rKadr" value="3000"></div>
+        </div>
+      </details>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="kp" aria-live="polite" id="kp"></div>
+      <p class="note">В настоящем сервисе КП сразу выгружается в PDF и уходит клиенту.</p>
+    </div>
+  </div>
+  <div class="grid2">
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <h3>Что ещё собирают так же</h3>
+      <div class="flow">
+        <div><b>Выбор системы налогообложения</b><span>сравнение режимов для клиента</span></div>
+        <div><b>Обработка выгрузки ОФД</b><span>чеки в понятную сводку</span></div>
+        <div><b>Сверка банка и АУСН</b><span>расхождения за минуту</span></div>
+      </div>
+    </div>
+    ${reels(['s01-calc','s02-taxcalc','s05-repair'],'Мои инструменты в Reels')}
+  </div>
+  ${next('service')}
+</section>`;
+
+/* --- step 3: agent --- */
+const NOAH = [
+  {q:'Сколько стоит тариф PRO?', a:'PRO — 39 900 ₽ вместо 49 900 ₽, цена первого потока, 15 мест. Внутри всё из AI-ПРАКТИК плюс модуль AI-ПЕРВИЧНИК — агент 1С.', s:'Бриф курса → Тарифы'},
+  {q:'В каком модуле учат клонировать голос?', a:'В модуле AI-КОНТЕНТ, урок 5: «Клонирование голоса: озвучка роликов своим голосом».', s:'Бриф курса → Модуль 4'},
+  {q:'Можно загружать данные клиентов?', a:'На курсе работаем с учебными и обезличенными данными. В модуле AI-ОСНОВА разбираем, что можно загружать, а что нельзя совсем.', s:'Бриф курса → Частые вопросы'},
+  {q:'Сделаете агента 1С под ключ?', a:'Нет, установку под ключ не обещаем. Даём шаблон бота и пошаговую инструкцию для баз 1С с доступом OData.', s:'Бриф курса → Чего не обещаем'}
+];
+V.agent = () => `
+<section class="view">
+  <div class="head">
+    <p class="eyebrow">Шаг 3 · Агент со знаниями</p>
+    <h2>Помощник, который знает <span class="it">ваши документы</span></h2>
+    <p class="lead">Чат каждый раз начинает с нуля. Агент держит вашу базу знаний — регламенты, прайсы, ответы на частые вопросы — и в каждом ответе показывает, откуда взял.</p>
+  </div>
+  <div class="flow" aria-label="Как агент отвечает">
+    <div>${ic('doc')}<b>База знаний</b><span>регламенты, документы, FAQ</span></div>
+    <div class="arrow" aria-hidden="true">→</div>
+    <div>${ic('brain')}<b>Поиск по смыслу</b><span>находит нужные фрагменты</span></div>
+    <div class="arrow" aria-hidden="true">→</div>
+    <div>${ic('chat')}<b>Ответ + источник</b><span>не выдумывает, а цитирует</span></div>
+  </div>
+  <div class="grid2">
+    <div class="panel dark" style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><p class="eyebrow" style="color:#E8A189">Ной · помощник в Telegram</p><span class="note" style="color:#B3A79F">пример диалога</span></div>
+      <div class="chat" id="noahChat"></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <h3>Спросите Ноя</h3>
+      <div class="chips" id="noahQ">${NOAH.map((x,i)=>`<button class="chip" data-q="${i}">${x.q}</button>`).join('')}</div>
+      <div class="panel" style="display:flex;flex-direction:column;gap:8px">
+        <h3>Где ещё пригодится</h3>
+        <p class="muted">Голосовой помощник: ищет в интернете, отвечает, выполняет поручения.</p>
+        <p class="muted">Помощник для клиентов: типовые вопросы, а сложное — передаёт бухгалтеру.</p>
+      </div>
+    </div>
+  </div>
+  ${reels(['p00-agent','p03-umeet','p02','s03-tg-assistant'],'Мой агент в Reels','чат или агент, утренняя газета, голосовое → план')}
+  ${next('agent')}
+</section>`;
+
+/* --- step 4: content factory --- */
+const CT = [
+  {id:'brand', icon:'palette', label:'Брендбук'},
+  {id:'montage', icon:'film', label:'Монтаж'},
+  {id:'voice', icon:'mic', label:'Голос'},
+  {id:'post', icon:'cal', label:'Автопостинг'},
+  {id:'metrics', icon:'chart', label:'Метрики'}
+];
+const CTV = {
+brand: () => `
+  <div class="grid2">
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <h3>Один брендбук — и ИИ больше не придумывает стиль заново</h3>
+      <p class="muted">Цвета, шрифты, логотип и правила сохраняются в файл BRAND.md. Перед каждым роликом, каруселью или обложкой ИИ читает его и не подменяет шрифт незаметно.</p>
+      <div class="swatches">
+        <div class="sw"><div style="background:#F4EEE9;border-bottom:1px solid var(--line)"></div><p><b>Молочный</b>#F4EEE9 · фон</p></div>
+        <div class="sw"><div style="background:#2E2A28"></div><p><b>Тёмный</b>#2E2A28 · текст</p></div>
+        <div class="sw"><div style="background:#7FAEC6"></div><p><b>Голубой</b>#7FAEC6 · главный акцент</p></div>
+        <div class="sw"><div style="background:#C56245"></div><p><b>Терракот</b>#C56245 · подписи, обводки</p></div>
+      </div>
+      <div class="typeset">
+        <div><p class="note">Текст и субтитры</p><p style="font-family:var(--f-text);font-size:22px;font-weight:600">Manrope</p></div>
+        <div><p class="note">Крупные слова и цифры</p><p style="font-family:var(--f-big);font-size:26px;font-weight:600">Playfair 54-ФЗ</p></div>
+        <div><p class="note">Смысловые слова</p><p style="font-family:var(--f-it);font-style:italic;font-size:30px;color:var(--terra)">вместо вас</p></div>
+      </div>
+    </div>
+    <div class="panel" style="display:flex;flex-direction:column;gap:12px">
+      <p class="who">Запрос, который закрепляет стиль</p>
+      <div class="out">Сохрани утверждённые правила в BRAND.md внутри проекта.
+Перед каждым новым монтажом читай этот файл.
+Если цвета, шрифты или логотип недоступны, сообщи об этом.
+Не подменяй шрифт и не придумывай новый логотип незаметно.</div>
+      <button class="btn" data-copy-prev>Скопировать</button>
+    </div>
+  </div>`,
+montage: () => `
+  <div style="display:flex;flex-direction:column;gap:20px">
+    <h3>От исходника на телефоне до готового MP4</h3>
+    <div class="steps">
+      <div><b>Исходники</b><span>видео с телефона и записи экрана</span></div>
+      <div><b>Расшифровка</b><span>речь с временными метками</span></div>
+      <div><b>Монтажный план</b><span>два варианта на выбор</span></div>
+      <div><b>Оформление</b><span>по брендбуку, субтитры по словам</span></div>
+      <div><b>Правки</b><span>по времени: «00:07 — поднять титр»</span></div>
+      <div><b>MP4</b><span>1080 × 1920, проверка файла</span></div>
+    </div>
+    <div class="grid2">
+      ${reels(['m01-vidy','m02-golova','m04-ekran','s04-montage'],'Смонтировано ИИ')}
+      <div class="panel" style="display:flex;flex-direction:column;gap:12px">
+        <p class="who">Как давать правки</p>
+        <div class="out">Правки к версии v01:
+1. 00:00–00:03 — заголовок слишком длинный. Оставить «Три ошибки».
+2. 00:07–00:10 — поднять субтитры: они перекрывают демонстрацию.
+3. Финал — держать призыв на секунду дольше.
+Сохрани остальной монтаж. Сделай v02 отдельным файлом.</div>
+        <button class="btn" data-copy-prev>Скопировать</button>
+        <p class="note">Инструменты: ChatGPT/Codex или Claude Code + Remotion. Паузы и оговорки ИИ убирает сам.</p>
+      </div>
+    </div>
+  </div>`,
+voice: () => `
+  <div class="grid2">
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <h3>Озвучка роликов вашим голосом — без записи</h3>
+      <p class="muted">Один раз записываете образец, сервис создаёт клон. Дальше пишете текст — получаете озвучку с таймингом каждого слова, и субтитры ложатся точно в речь.</p>
+      <div class="steps">
+        <div><b>Образец голоса</b><span>пара минут записи один раз</span></div>
+        <div><b>Текст ролика</b><span>ИИ пишет вашим языком</span></div>
+        <div><b>Озвучка</b><span>клон голоса + тайминг слов</span></div>
+        <div><b>Ролик</b><span>субтитры и графика по словам</span></div>
+      </div>
+    </div>
+    ${reels(['s04-montage','h01-humanizer'],'Озвучено клоном голоса','я их не записывала')}
+  </div>`,
+post: () => `
+  <div style="display:flex;flex-direction:column;gap:18px">
+    <div class="flow">
+      <div><b>Один исходник</b><span>идея, голосовое или статья</span></div><div class="arrow" aria-hidden="true">→</div>
+      <div><b>Контент-завод</b><span>пост, карусель, Reels, сторис</span></div><div class="arrow" aria-hidden="true">→</div>
+      <div><b>Расписание</b><span>выходит без вашего участия</span></div><div class="arrow" aria-hidden="true">→</div>
+      <div><b>Площадки</b><span>Instagram, Telegram, VK, MAX</span></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap"><h3>Неделя из одного исходника</h3><span class="note">пример контент-плана · нажмите на день</span></div>
+    <div class="weekwrap"><div class="week" id="week"></div></div>
+    <div class="chips" aria-label="Легенда"><span class="post reels">Reels</span><span class="post car">Карусель</span><span class="post text">Пост</span><span class="post story">Сторис</span></div>
+    <div class="grid2">
+      <div class="panel" style="display:flex;flex-direction:column;gap:12px">
+        <h3>Мой автопилот: 2 Reels в день</h3>
+        <div class="steps">
+          <div><b>Тема из плана</b><span>30 дней, 60 тем</span></div>
+          <div><b>Сценарий</b><span>агент пишет 2 ролика</span></div>
+          <div><b>Голос</b><span>клон голоса, тайминг слов</span></div>
+          <div><b>Анимация</b><span>схема или кинетический текст</span></div>
+          <div><b>Согласование</b><span>без моего «Одобрить» не выходит</span></div>
+        </div>
+        <p class="note">Один движок ведёт несколько аккаунтов: для бухгалтеров и для предпринимателей.</p>
+      </div>
+      ${reels(['n01','n07','n30'],'Аккаунт для предпринимателей')}
+    </div>
+  </div>`,
+metrics: () => `
+  <div style="display:flex;flex-direction:column;gap:18px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap"><h3>Что смотреть каждую неделю</h3><span class="note">впишите свои цифры — шкала пересчитается</span></div>
+    <div class="metrics" id="metrics"></div>
+  </div>`
+};
+V.content = (sub) => `
+<section class="view">
+  <div class="head">
+    <p class="eyebrow">Шаг 4 · Контент-завод</p>
+    <h2>Соцсети <span class="it">вашим голосом</span> — без студии и монтажёра</h2>
+    <p class="lead">Бухгалтеру нужны клиенты, а на контент нет времени. ИИ берёт всю цепочку: стиль, тексты, монтаж, озвучку и публикацию по расписанию.</p>
+  </div>
+  <div class="tabs" role="tablist">${CT.map(t=>`<button role="tab" data-tab="${t.id}" aria-selected="${t.id===sub}">${ic(t.icon)}${t.label}</button>`).join('')}</div>
+  <div id="ctBody">${CTV[sub]()}</div>
+  ${next('content')}
+</section>`;
+
+/* --- step 5: 1C agent --- */
+const ONEC = [
+  {t:'me', who:'Клиент · MAX', x:'Добрый день! Выставьте, пожалуйста, счёт на консультацию по НДС, 2 часа.'},
+  {t:'bot', who:'Агент 1С', x:'Нашёл покупателя в базе: ООО «ДЕМО ТОРГ». Услуга «Консультация по налогам» есть в номенклатуре — новую не создаю. Создаю счёт…'},
+  {t:'doc'},
+  {t:'me', who:'Клиент · MAX', x:'Спасибо! И закрывающие тоже, пожалуйста.'},
+  {t:'bot', who:'Агент 1С', x:'Готово: акт по этому счёту создан в 1С. Бухгалтер проверит и отправит.'}
+];
+V.onec = () => `
+<section class="view">
+  <div class="head">
+    <p class="eyebrow">Шаг 5 · Агент 1С</p>
+    <h2>Клиент пишет заявку — <span class="it">бот готовит счёт</span></h2>
+    <p class="lead">Бот в мессенджере понимает обычную фразу клиента, находит покупателя и услугу, не плодит дубли номенклатуры и сам создаёт документ в 1С: счёт, УПД, акт или ТОРГ-12.</p>
+  </div>
+  <div class="grid2">
+    <div class="panel dark" style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><p class="eyebrow" style="color:#E8A189">Группа клиента в MAX</p><span class="note" style="color:#B3A79F">учебная база · пример</span></div>
+      <div class="chat" id="onecChat"></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn blue" id="onecPlay">▶ Запустить пример</button><button class="btn" id="onecReset" style="background:transparent;color:var(--paper);border-color:#5E544E">Сначала</button></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <h3>Что нужно для запуска</h3>
+      <div class="flow" style="flex-direction:column">
+        <div><b>1С с доступом OData</b><span>42Clouds, 1С:Фреш или своя 1С с веб-публикацией</span></div>
+        <div><b>Бот в MAX</b><span>группа клиента, привязка базы, сотрудники</span></div>
+        <div><b>Шаблон и инструкция</b><span>ставите сами по шагам</span></div>
+      </div>
+      <h3 style="margin-top:6px">Безопасность</h3>
+      <div class="chips"><span class="chip">ИНН обезличивается</span><span class="chip">152-ФЗ</span><span class="chip">Видно, что получает нейросеть</span><span class="chip">Последнее слово — за бухгалтером</span></div>
+    </div>
+  </div>
+  ${next('onec')}
+</section>`;
+
+/* --- course --- */
+const MODS = [
+ ['AI-ОСНОВА','пошагово от первого входа до своих первых помощников','14 уроков · 2 ч 30 мин',[['С чего начать: что подготовить и какой результат получите',5],['Обзор нейросетей: ChatGPT, Claude и российские сервисы',15],['Регистрация: аккаунт, чат в браузере и приложение',10],['Как поставить задачу ИИ и получить нужный ответ',15],['Безопасность: что можно загружать и как обезличить',10],['Работа с информацией: документы, таблицы и сводки',15],['Проверяем ответ ИИ: нормы, письма и расчёты',10],['Презентации с помощью ИИ',10],['Проекты: зачем нужны и как создать в каждой нейросети',15],['Папка на компьютере: порядок в материалах',5],['Скиллы: гуманайзер, структура и качество ответа',10],['Первые помощники в чате: кадровик, финансист, налоговый консультант',10],['Обучаем помощника: материалы, примеры и исправление ошибок',10],['Итог: решаем свою рабочую задачу от начала до конца',10]]],
+ ['AI-ПРАКТИКА','ИИ как сотрудник в задачах бухгалтера','14 уроков · 4 ч 40 мин',[['Оппонент: спорная ситуация — аргументы за и против',20],['Исследователь: разъяснения ведомств и судебная практика',20],['Аналитик: какой налоговый режим выгоднее клиенту',20],['Ревизор: договор глазами бухгалтера',20],['Помощник: требование ФНС — план действий и черновик ответа',20],['Тренажёр: разговор с инспектором и подготовка к допросу',20],['Техподдержка: ошибка в 1С и отчётности по скриншоту',20],['Секретарь: созвон с клиентом — протокол, задачи и письмо',20],['Партнёр по репетиции: долг, повышение цены, ошибка, лишняя работа',20],['Переводчик: отчёт для собственника',20],['Методолог: регламент из голосового и записи экрана',20],['Обработчик: первичка, выписки и сверки',20],['Ассистент по расписанию: дайджест изменений и налоговый календарь',20],['Итоговый проект: личная карта ИИ-задач и замер времени',20]]],
+ ['AI-АГЕНТЫ','помощник с вашей базой знаний','7 уроков · 2 ч 20 мин',[['Что такое AI-агент и чем он отличается от чата',20],['База знаний: собираем регламенты, документы и ответы на частые вопросы',20],['Как агент находит ответ и не выдумывает: ссылка на источник в каждом ответе',20],['Агент с доступом к папке на компьютере',20],['Голосовой помощник в Telegram: ищет в интернете, отвечает и выполняет поручения',20],['Помощник для клиентов: типовые вопросы, правила и передача вопроса бухгалтеру',20],['Итог: свой агент под свою задачу',20]]],
+ ['AI-КОНТЕНТ','агент «контент-завод»','8 уроков · 2 ч 40 мин',[['Позиционирование и контент-план с ИИ',20],['Свой брендбук: цвета, шрифты, стиль, шаблоны',20],['Ваш голос в текстах: ИИ пишет вашим языком',20],['Контент-завод: из одного исходника пост, карусель, Reels и сторис',25],['Клонирование голоса: озвучка роликов своим голосом',20],['Видео без студии: сценарий, субтитры, монтаж',20],['Визуал по брендбуку: обложки и карусели',15],['Ролики по расписанию без вашего участия и аналитика',20]]],
+ ['AI-ПЕРВИЧНИК','агент 1С · тарифы PRO и AI-КОМАНДА','5 уроков · 1 ч 45 мин',[['Что умеет ИИ-первичник: от заявки клиента до счёта и УПД в 1С',20],['Подключаем 1С: OData в 42Clouds, 1С:Фреш и своей 1С',20],['Бот в MAX и группа клиента: ключи, привязка базы, сотрудники',20],['Работа с заявками: покупатель, товар или услуга, номенклатура без дублей, счёт, УПД, акт, ТОРГ-12',25],['Безопасность и запуск: что видит нейросеть, 152-ФЗ, разбор ошибок, установка шаблона',20]]],
+ ['AI-ИНСТРУМЕНТЫ','вайб-кодинг для бухгалтера','7 уроков · 2 ч 20 мин',[['Что такое вайб-кодинг: ИИ пишет программу, вы ставите задачу',20],['Калькулятор стоимости услуг с генерацией КП в PDF',20],['Калькулятор выбора системы налогообложения',20],['Обработка выгрузки ОФД',20],['Сверка: банк и АУСН',20],['Свой продукт: как упаковать инструмент и продавать клиентам',20],['Практикум: делаем инструмент под свою задачу',20]]]
+];
+const STEPMAP = ['шаг 1','шаг 1','шаг 3','шаг 4','шаг 5','шаг 2'];
+V.course = () => `
+<section class="view">
+  <div class="panel dark" style="padding:clamp(28px,5vw,56px);display:flex;flex-direction:column;gap:16px">
+    <p class="eyebrow" style="color:#E8A189">Всё в одном месте</p>
+    <h2 style="color:var(--paper)">Коллеги, всё, что вы сегодня видели, <span class="it" style="color:#E8A189">я собрала в один курс</span></h2>
+    <p class="muted" style="font-size:19px;max-width:760px">«ИИ для бухгалтера»: 6 модулей, 55 уроков, 16 ч 15 мин. Каждый шаг вебинара — отдельный модуль, где мы делаем это руками, на ваших задачах.</p>
+  </div>
+  <div class="mods">${MODS.map((m,i)=>`
+    <details class="mod" ${i===4?'open':''}>
+      <summary><span class="n">${i+1}</span><span class="t"><b>${m[0]}</b><span>${m[1]}</span></span><span class="m">${m[2]} · ${STEPMAP[i]}</span></summary>
+      <ol>${m[3].map(l=>`<li>${esc(l[0])} <span>· ${l[1]} мин</span></li>`).join('')}</ol>
+    </details>`).join('')}
+  </div>
+  <div class="head"><p class="eyebrow">Тарифы · доступ 12 месяцев · сертификат</p><h2>Выберите свой <span class="it">уровень</span></h2></div>
+  <div class="tariffs">
+    <div class="tariff"><h3>AI-СТАРТ</h3><p class="p">9 900 ₽</p><s>14 900 ₽</s><ul><li>Модуль ОСНОВА</li><li>14 уроков, 2 ч 30 мин</li><li>Первые помощники в чате</li></ul></div>
+    <div class="tariff rec"><span class="tag">Рекомендую</span><h3>AI-ПРАКТИК</h3><p class="p">27 900 ₽</p><s>34 900 ₽</s><ul><li>ОСНОВА, ПРАКТИКА, АГЕНТЫ, КОНТЕНТ, ИНСТРУМЕНТЫ</li><li>50 уроков, 14 ч 30 мин</li><li>Групповой разбор</li><li>Библиотека запросов</li></ul></div>
+    <div class="tariff"><h3>PRO</h3><p class="p">39 900 ₽</p><s>49 900 ₽</s><ul><li>Всё из AI-ПРАКТИК</li><li>+ агент 1С: шаблон и инструкция</li><li>55 уроков, 16 ч 15 мин</li><li>Цена первого потока, 15 мест</li></ul></div>
+    <div class="tariff"><h3>AI-КОМАНДА</h3><p class="p">55 900 ₽</p><s>69 900 ₽</s><ul><li>Всё из PRO на 5 человек</li><li>Созвон по внедрению с командой, 60 мин</li><li>Финмодель бухгалтерской фирмы в подарок</li></ul></div>
+  </div>
+  <div class="offer"><div><h3>Скидка до 15 ноября</h3><p>AI-КОМАНДА — 55 900 ₽ вместо 69 900 ₽. PRO — 15 мест по цене первого потока.</p></div><p style="font-weight:700">Ссылка на курс — в канале <a href="https://t.me/Tatev_ProBusiness" target="_blank" rel="noopener" style="color:inherit">t.me/Tatev_ProBusiness</a></p></div>
+  <div class="head"><p class="eyebrow">Частые вопросы</p></div>
+  <div class="faq">
+    <div><h3>Подойдёт новичку?</h3><p class="muted">Да. Начинаем с настройки ИИ и первых запросов, код не нужен.</p></div>
+    <div><h3>А данные клиентов?</h3><p class="muted">Учебные и обезличенные. В модуле ОСНОВА учим, что можно загружать.</p></div>
+    <div><h3>Нужен VPN и зарубежная карта?</h3><p class="muted">Есть варианты без них, для каждой задачи показываем альтернативы.</p></div>
+    <div><h3>Агент 1С подойдёт к моей базе?</h3><p class="muted">Если есть OData: 42Clouds, 1С:Фреш или своя 1С с веб-публикацией.</p></div>
+  </div>
+  <div class="tg">
+    <a href="https://t.me/Tatev_ProBusiness" target="_blank" rel="noopener">${ic('chat')}<span><span class="who">Telegram-канал</span><b>Канал для коллег про ИИ и автоматизацию</b><span class="muted">t.me/Tatev_ProBusiness</span></span></a>
+    <a href="https://t.me/TatevProfbuh_bot" target="_blank" rel="noopener">${ic('brain')}<span><span class="who">Telegram-бот</span><b>Мой бот</b><span class="muted">@TatevProfbuh_bot</span></span></a>
+  </div>
+</section>`;
+
+/* ---------- behaviour ---------- */
+const app = document.getElementById('app');
+const rail = document.getElementById('rail');
+rail.innerHTML = ROUTES.map(r=>`<a href="#${r.id}" data-r="${r.id}">${r.n?`<span class="n">${r.n}</span>`:''}${r.label}</a>`).join('');
+let contentTab = 'brand';
+
+function current(){ const h = location.hash.replace('#',''); return ROUTES.some(r=>r.id===h) ? h : 'home'; }
+function render(){
+  const id = current();
+  app.innerHTML = id==='content' ? V.content(contentTab) : V[id]();
+  rail.querySelectorAll('a').forEach(a=>{ if(a.dataset.r===id){a.setAttribute('aria-current','page'); a.scrollIntoView({block:'nearest',inline:'center'});} else a.removeAttribute('aria-current'); });
+  window.scrollTo({top:0});
+  wire(id);
+}
+function copy(text, btn){
+  const done = () => { const o = btn.textContent; btn.textContent = 'Скопировано'; setTimeout(()=>btn.textContent=o, 1400); };
+  try { navigator.clipboard.writeText(text).then(done).catch(()=>selectFallback(btn)); } catch(e){ selectFallback(btn); }
+}
+function selectFallback(btn){ const el = btn.previousElementSibling; if(!el) return; const r = document.createRange(); r.selectNodeContents(el); const s = getSelection(); s.removeAllRanges(); s.addRange(r); btn.textContent = 'Выделено — нажмите ⌘C'; }
+
+function wire(id){
+  app.querySelectorAll('[data-copy-prev]').forEach(b=>b.addEventListener('click',()=>copy(b.previousElementSibling.textContent,b)));
+  if(id==='chat') wireChat();
+  if(id==='service') wireCalc();
+  if(id==='agent') wireNoah();
+  if(id==='content') wireContent();
+  if(id==='onec') wireOnec();
+}
+
+function wireChat(){
+  const $ = s=>document.getElementById(s);
+  const build = () => {
+    const parts = [`Ты — ${ROLES[$('pRole').value]}.`];
+    if($('pCtx').value.trim()) parts.push(`Контекст: ${$('pCtx').value.trim()}`);
+    if($('pTask').value.trim()) parts.push(`Задача: ${$('pTask').value.trim()}`);
+    parts.push(`Формат: ${FORMATS[$('pFmt').value]}.`);
+    if($('pCheck').checked) parts.push('Сошлись на конкретные статьи НК РФ и письма ведомств. Отдельным списком отметь, что нужно проверить по первоисточнику. Если данных не хватает — задай уточняющие вопросы.');
+    $('pOut').textContent = parts.join('\n\n');
+  };
+  const load = i => { const e = EXAMPLES[i]; $('pRole').value=e.role; $('pCtx').value=e.ctx; $('pTask').value=e.task; $('pFmt').value=e.fmt;
+    document.querySelectorAll('#exChips .chip').forEach(c=>c.setAttribute('aria-pressed', c.dataset.ex==i)); build(); };
+  document.getElementById('exChips').addEventListener('click',e=>{ const b=e.target.closest('[data-ex]'); if(b) load(+b.dataset.ex); });
+  ['pRole','pCtx','pTask','pFmt','pCheck'].forEach(k=>$(k).addEventListener('input',build));
+  $('pCopy').addEventListener('click',()=>{ const b=$('pCopy'); try{ navigator.clipboard.writeText($('pOut').textContent).then(()=>{$('pCopied').textContent='Скопировано';setTimeout(()=>$('pCopied').textContent='',1500)}).catch(()=>{$('pCopied').textContent='Выделите текст и скопируйте'}); }catch(e){ $('pCopied').textContent='Выделите текст и скопируйте'; } });
+  load(1);
+}
+
+function wireCalc(){
+  const $ = s=>document.getElementById(s);
+  const v = s => Math.max(0, +$(s).value || 0);
+  const calc = () => {
+    const reg = REG[$('cReg').value];
+    const rows = [[`Бухгалтерское и налоговое обслуживание (${reg[0]})`, reg[1]], [`Первичные документы и операции: ${v('cOps')}`, v('cOps')*v('rOp')]];
+    if($('cKadr').checked) rows.push([`Кадровый учёт и зарплата: ${v('cEmp')} сотр.`, v('cEmp')*v('rEmp') + v('rKadr')]);
+    if($('cVed').checked) rows.push(['Сопровождение ВЭД', v('rVed')]);
+    const total = rows.reduce((s,r)=>s+r[1],0);
+    $('kp').innerHTML = `
+      <div class="kp-top"><div><p class="who">Коммерческое предложение</p><b style="font-size:17px">${esc($('cName').value || 'Клиент')}</b></div><img src="${LOGO}" alt="ТАТЕВ"></div>
+      <p>Предлагаем ежемесячное бухгалтерское сопровождение. Состав работ и стоимость:</p>
+      <table>${rows.map(r=>`<tr><td>${esc(r[0])}</td><td>${rub(r[1])}</td></tr>`).join('')}<tr class="total"><td>Итого в месяц</td><td>${rub(total)}</td></tr></table>
+      <p class="price" style="color:var(--terra-deep)">${rub(total)}<span style="font-family:var(--f-text);font-size:15px;color:var(--ink-3)"> / мес</span></p>
+      <p class="note">Условные расценки для демонстрации.</p>`;
+  };
+  app.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',calc));
+  calc();
+}
+
+function wireNoah(){
+  const chat = document.getElementById('noahChat');
+  const ask = i => { const x = NOAH[i];
+    chat.insertAdjacentHTML('beforeend', `<div class="msg me">${esc(x.q)}</div>`);
+    setTimeout(()=>{ chat.insertAdjacentHTML('beforeend', `<div class="msg bot">${esc(x.a)}<span class="src">Источник: ${esc(x.s)}</span></div>`); trim(); }, 650);
+  };
+  const trim = () => { while(chat.children.length>6) chat.firstElementChild.remove(); };
+  document.getElementById('noahQ').addEventListener('click',e=>{ const b=e.target.closest('[data-q]'); if(b) ask(+b.dataset.q); });
+  chat.innerHTML = `<div class="msg me">${esc(NOAH[0].q)}</div><div class="msg bot">${esc(NOAH[0].a)}<span class="src">Источник: ${esc(NOAH[0].s)}</span></div>`;
+}
+
+const WEEK = [
+  ['ПН',[['reels','Reels: «3 налога до 1 декабря»']]],
+  ['ВТ',[['car','Карусель: чек-лист сроков'],['story','Сторис: опрос']]],
+  ['СР',[['text','Пост: разбор вопроса клиента']]],
+  ['ЧТ',[['reels','Reels: ответ на комментарий'],['story','Сторис: за кадром']]],
+  ['ПТ',[['car','Карусель: ошибки в УПД']]],
+  ['СБ',[['story','Сторис: итоги недели']]],
+  ['ВС',[['text','Пост: личная история']]]
+];
+function wireContent(){
+  app.querySelector('.tabs').addEventListener('click',e=>{ const b=e.target.closest('[data-tab]'); if(!b) return; contentTab=b.dataset.tab;
+    app.querySelectorAll('.tabs button').forEach(x=>x.setAttribute('aria-selected', x===b));
+    const body = document.getElementById('ctBody'); body.innerHTML = CTV[contentTab](); wireSub(); });
+  wireSub();
+}
+function wireSub(){
+  document.querySelectorAll('#ctBody [data-copy-prev]').forEach(b=>b.addEventListener('click',()=>copy(b.previousElementSibling.textContent,b)));
+  const week = document.getElementById('week');
+  if(week){
+    week.innerHTML = WEEK.map((d,i)=>`<button class="day" data-day="${i}" style="text-align:left;font:inherit;color:inherit"><span class="d">${d[0]}</span>${d[1].map(p=>`<span class="post ${p[0]}">${p[1]}</span>`).join('')}</button>`).join('');
+    week.addEventListener('click',e=>{ const b=e.target.closest('[data-day]'); if(!b) return; b.querySelectorAll('.post').forEach(p=>{p.animate([{transform:'scale(1)'},{transform:'scale(1.06)'},{transform:'scale(1)'}],{duration:350});}); b.style.borderColor='var(--blue)'; });
+  }
+  const m = document.getElementById('metrics');
+  if(m){
+    const M = [
+      ['Охват','сколько людей увидели','Статистика Instagram / Telegram / VK'],
+      ['Досмотры Reels','держит ли начало ролика','Статистика ролика'],
+      ['Сохранения и репосты','польза контента','Статистика публикации'],
+      ['Переходы на сайт','интерес к услугам','Яндекс Метрика'],
+      ['Заявки','пишут ли вам','Мессенджеры и CRM'],
+      ['Клиенты из соцсетей','деньги, а не лайки','Ваш учёт']
+    ];
+    m.innerHTML = M.map((x,i)=>`<div class="metric"><h3>${x[0]}</h3><p class="muted" style="font-size:14px">${x[1]}</p><div style="display:flex;gap:8px;align-items:center"><label class="note" for="mt${i}">Прошлая</label><input type="number" id="mt${i}" min="0" placeholder="—"><label class="note" for="mn${i}">Эта</label><input type="number" id="mn${i}" min="0" placeholder="—"></div><div class="bar-m"><i id="mb${i}" style="width:0%"></i></div><p class="note" id="mr${i}">${x[2]}</p></div>`).join('');
+    M.forEach((x,i)=>{ const upd=()=>{ const a=+document.getElementById('mt'+i).value||0, b=+document.getElementById('mn'+i).value||0; const bar=document.getElementById('mb'+i), r=document.getElementById('mr'+i);
+      if(a>0 && b>=0){ const d=Math.round((b-a)/a*100); bar.style.width=Math.min(100,Math.max(4,b/Math.max(a,b)*100))+'%'; bar.style.background = d>=0?'var(--blue)':'var(--terra)'; r.textContent = (d>=0?'Рост +':'Снижение ')+d+'% · '+x[2]; } else { bar.style.width='0%'; r.textContent=x[2]; } };
+      ['mt','mn'].forEach(p=>document.getElementById(p+i).addEventListener('input',upd)); });
+  }
+}
+
+function wireOnec(){
+  const chat = document.getElementById('onecChat');
+  let timers = [];
+  const today = new Date().toLocaleDateString('ru-RU');
+  const item = s => s.t==='doc'
+    ? `<div class="doc"><p class="who">Документ в 1С</p><b>Счёт на оплату № [номер] от ${today}</b><p style="margin-top:6px">Покупатель: ООО «ДЕМО ТОРГ»<br>Консультация по налогам · 2 ч<br>Сумма — по прайсу в 1С</p><p class="note" style="margin-top:6px">Создан через OData · ждёт проверки бухгалтера</p></div>`
+    : `<div class="msg ${s.t}"><span class="who" style="display:block;margin-bottom:3px">${s.who}</span>${esc(s.x)}</div>`;
+  const reset = () => { timers.forEach(clearTimeout); timers=[]; chat.innerHTML = `<p class="muted" style="margin:auto;text-align:center">Нажмите «Запустить пример»</p>`; };
+  const play = () => { reset(); chat.innerHTML=''; ONEC.forEach((s,i)=>timers.push(setTimeout(()=>chat.insertAdjacentHTML('beforeend', item(s)), 200 + i*1300))); };
+  document.getElementById('onecPlay').addEventListener('click',play);
+  document.getElementById('onecReset').addEventListener('click',reset);
+  chat.innerHTML = ONEC.map(item).join('');
+}
+
+/* reels player */
+let player = null, pSet = [], pIdx = 0, lastFocus = null;
+function openReel(id, set){
+  pSet = set; pIdx = Math.max(0, set.indexOf(id)); lastFocus = document.activeElement;
+  if(!player){
+    player = document.createElement('div'); player.className = 'player'; player.setAttribute('role','dialog'); player.setAttribute('aria-modal','true'); player.hidden = true;
+    player.innerHTML = `<button class="x" id="pX">Закрыть ✕</button><div class="player-in"><video id="pV" controls playsinline></video><p id="pT"></p><div class="nav"><button class="btn" id="pPrev">← Назад</button><button class="btn blue" id="pNext">Следующий →</button></div></div>`;
+    document.body.appendChild(player);
+    player.addEventListener('click', e=>{ if(e.target===player) closeReel(); });
+    player.querySelector('#pX').addEventListener('click', closeReel);
+    player.querySelector('#pPrev').addEventListener('click', ()=>stepReel(-1));
+    player.querySelector('#pNext').addEventListener('click', ()=>stepReel(1));
+  }
+  player.hidden = false; showReel(); player.querySelector('#pX').focus();
+}
+function showReel(){
+  const id = pSet[pIdx], v = player.querySelector('#pV');
+  v.src = `media/reels/${id}.mp4`; v.poster = `media/reels/${id}.jpg`;
+  player.querySelector('#pT').textContent = REELS[id][0];
+  player.querySelector('#pPrev').hidden = pSet.length<2; player.querySelector('#pNext').hidden = pSet.length<2;
+  const p = v.play(); if(p) p.catch(()=>{});
+}
+function stepReel(d){ pIdx = (pIdx + d + pSet.length) % pSet.length; showReel(); }
+function closeReel(){ if(!player) return; const v = player.querySelector('#pV'); v.pause(); v.removeAttribute('src'); v.load(); player.hidden = true; if(lastFocus) lastFocus.focus(); }
+document.addEventListener('click', e=>{ const b = e.target.closest('[data-reel]'); if(b) openReel(b.dataset.reel, b.dataset.set.split(',')); });
+
+addEventListener('hashchange', ()=>{ closeReel(); render(); });
+addEventListener('keydown', e=>{
+  if(player && !player.hidden){ if(e.key==='Escape') closeReel(); if(e.key==='ArrowRight') stepReel(1); if(e.key==='ArrowLeft') stepReel(-1); return; }
+  if(e.target.closest('input,textarea,select') || e.metaKey || e.ctrlKey || e.altKey) return;
+  const i = ROUTES.findIndex(r=>r.id===current());
+  if(e.key==='ArrowRight' && i<ROUTES.length-1) location.hash = ROUTES[i+1].id;
+  if(e.key==='ArrowLeft' && i>0) location.hash = ROUTES[i-1].id;
+});
+render();
+})();
+</script>
+</body>
+</html>
